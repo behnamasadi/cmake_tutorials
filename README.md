@@ -894,5 +894,6 @@ References:[1](https://gist.github.com/mbinna/),
 
 [![Build Status](https://travis-ci.com/behnamasadi/cmake_tutorials.svg?branch=master)](https://travis-ci.com/behnamasadi/cmake_tutorials)
 ![alt text](https://img.shields.io/badge/license-BSD-blue.svg)
+
 <small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
 

@@ -1,29 +1,5 @@
 sudo: false
-dist: bionic 
-
-
-
-install:
-  - git clone https://github.com/gflags/gflags
-  - cd gflags
-  - mkdir build
-  - cd build
-  - cmake -DCMAKE_CXX_FLAGS=-std=c++11 -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX:PATH=~/usr .. && make -j8 all install 
-
-  - cd ~
-  - git clone https://github.com/google/glog
-  - cd glog
-  - mkdir build
-  - cd build
-  - cmake -DCMAKE_CXX_FLAGS=-std=c++11 -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX:PATH=~/usr .. && make -j8 all install
-
-
-  - cd ~
-  - git clone https://github.com/google/googletest
-  - cd googletest
-  - mkdir build
-  - cd build
-  - cmake -DCMAKE_CXX_FLAGS=-std=c++1z -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX:PATH=~/usr .. && make -j8 all install 
+dist: groovy
 
   - cd ~
   - sudo apt-get install cppcheck ggcov lcov valgrind kcachegrind
@@ -31,13 +7,9 @@ install:
 # Enable C++ support
 language: cpp
 script:
-  - cd ~
-  - rm -rf gflags
-  - rm -rf glog
-  - rm -rf googletest
   - git clone https://github.com/behnamasadi/cmake_tutorials/
   - cd cmake_tutorials
   - mkdir build
   - cd build
   - cmake .. && make -j8
-  - ctest  build/tests/
+  - ctest  tests
