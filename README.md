@@ -1,3 +1,67 @@
+- [CMake Tutorials](#cmake-tutorials)
+  * [Typical project structure](#typical-project-structure)
+  * [Setting the compiler](#setting-the-compiler)
+    + [clang](#clang)
+    + [gcc](#gcc)
+  * [Cmake command Line Parameters](#cmake-command-line-parameters)
+  * [CMake Variables, Cache Variables and Options](#cmake-variables--cache-variables-and-options)
+    + [Variables](#variables)
+    + [Cache Variables](#cache-variables)
+    + [Options](#options)
+    + [Important Variables](#important-variables)
+  * [Properties](#properties)
+    + [Generating solution for Visual Studio, Xcode :](#generating-solution-for-visual-studio--xcode--)
+    + [Visual Studio](#visual-studio)
+    + [Visualising dependency graph:](#visualising-dependency-graph-)
+    + [Lisiting all variables with description:](#lisiting-all-variables-with-description-)
+  * [Scripting in CMake](#scripting-in-cmake)
+  * [Built-in Commands and Functions in CMake](#built-in-commands-and-functions-in-cmake)
+    + [add_subdirectory()](#add-subdirectory--)
+    + [include()](#include--)
+    + [include_directories()](#include-directories--)
+    + [target_include_directories()](#target-include-directories--)
+      - [PUBLIC, PRIVATE, and INTERFACE](#public--private--and-interface)
+    + [add_library()](#add-library--)
+    + [add_executable()](#add-executable--)
+    + [target_link_libraries()](#target-link-libraries--)
+    + [mark_as_advanced()](#mark-as-advanced--)
+    + [install()](#install--)
+  * [Communicating with your code](#communicating-with-your-code)
+    + [Reading from CMake into your files](#reading-from-cmake-into-your-files)
+    + [CMake reading from your files](#cmake-reading-from-your-files)
+  * [Testing](#testing)
+  * [GoogleTest](#googletest)
+    + [Download method](#download-method)
+    + [FetchContent](#fetchcontent)
+  * [Exporting Your Project](#exporting-your-project)
+    + [1) Adding Subproject](#1--adding-subproject)
+    + [2) Exporting build directory of your project.](#2--exporting-build-directory-of-your-project)
+    + [3) Installing your project and calling find_package()](#3--installing-your-project-and-calling-find-package--)
+    + [Find\<package\>.cmake](#find--package--cmake)
+    + [\<package\>Config.cmake](#--package--configcmake)
+  * [How to find CMake from arbitrary installed locations](#how-to-find-cmake-from-arbitrary-installed-locations)
+    + [PCL point cloud](#pcl-point-cloud)
+    + [OpenCV](#opencv)
+    + [glog](#glog)
+  * [Using pkgconfig (.pc files)](#using-pkgconfig--pc-files-)
+    + [Flann](#flann)
+    + [TinyXML2](#tinyxml2)
+    + [yaml-cpp](#yaml-cpp)
+    + [Google Benchmark](#google-benchmark)
+  * [Setting Important Variables](#setting-important-variables)
+    + [C++17 support](#c--17-support)
+    + [Position independent code](#position-independent-code)
+    + [Turning warning into errors](#turning-warning-into-errors)
+    + [Finding Memory leaking, Stack and Heap overflow](#finding-memory-leaking--stack-and-heap-overflow)
+    + [Turning off the warning from unused variables](#turning-off-the-warning-from-unused-variables)
+    + [Setting build type](#setting-build-type)
+  * [Running a Command in CMake](#running-a-command-in-cmake)
+    + [At Configure Time](#at-configure-time)
+    + [At Build Time](#at-build-time)
+
+
+
+
 # CMake Tutorials
 
 ##  Typical project structure
@@ -825,3 +889,10 @@ References:[1](https://gist.github.com/mbinna/),
 [13](https://foonathan.net/2016/03/cmake-install/), 
 [14](https://pabloariasal.github.io/2018/02/19/its-time-to-do-cmake-right/),
 [15](https://www.youtube.com/watch?v=rLopVhns4Zs)
+
+
+
+[![Build Status](https://travis-ci.com/behnamasadi/cmake_tutorials.svg?branch=master)](https://travis-ci.com/behnamasadi/cmake_tutorials)
+![alt text](https://img.shields.io/badge/license-BSD-blue.svg)
+<small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
+
