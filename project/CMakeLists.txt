@@ -1,0 +1,109 @@
+###
+# config
+###
+cmake_minimum_required(VERSION 3.1)
+ 
+# This is required for ExternalProject_Add()
+include(ExternalProject)
+
+set(CMAKE_VERBOSE_MAKEFILE FALSE)
+set(CMAKE_MACOSX_RPATH 1)
+set(CMAKE_INSTALL_PREFIX "$ENV{HOME}/usr")
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+
+
+###
+# project
+### 
+set(PROJECT my_project)
+project(${PROJECT} VERSION 1.2.3.4 DESCRIPTION "An example project with CMake" LANGUAGES CXX)
+
+
+###
+# variables
+###
+
+set(MY_PROJECT_INCLUDES ${PROJECT_SOURCE_DIR}/includes)
+set(EXTERN_INCLUDES ${PROJECT_SOURCE_DIR}/extern/include)
+set(EXTERN_LIBRARIES ${PROJECT_SOURCE_DIR}/extern/lib)
+
+
+###
+# includes
+###
+include_directories(${MY_PROJECT_INCLUDES} ${EXTERN_INCLUDES})
+
+
+add_subdirectory(src)
+add_subdirectory(apps)
+
+
+
+
+# Let's nicely support folders in IDE's
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+
+###
+# examples
+###
+option(BUILD_EXAMPLES "Build the examples" ON)
+if (BUILD_EXAMPLES)
+	add_subdirectory(examples)
+endif (BUILD_EXAMPLES)
+
+###
+# tests
+###
+
+option(BUILD_TESTS "Build the tests" ON)
+if(BUILD_TESTS)
+	enable_testing()
+	add_subdirectory(tests)
+	ExternalProject_Add("googletest"
+				GIT_REPOSITORY "https://github.com/google/googletest.git"
+				CMAKE_ARGS "-DCMAKE_INSTALL_PREFIX=${PROJECT_SOURCE_DIR}/extern")
+endif()
+
+
+
+
+option(BUILD_DOCS "Build the documentation" ON)
+if(BUILD_DOCS)
+	find_package(Doxygen)
+	if(Doxygen_FOUND)
+		add_subdirectory(docs)
+	else()
+		message(STATUS "Doxygen not found, not building docs")
+	endif()
+endif()
+
+
+
+MESSAGE( STATUS "PROJECT_NAME: " ${PROJECT_NAME} )  
+MESSAGE( STATUS "PROJECT_VERSION: " ${PROJECT_VERSION} )  
+MESSAGE( STATUS "BUILD_SHARED_LIBS: " ${BUILD_SHARED_LIBS} )  
+MESSAGE( STATUS "BUILD_TESTS: " ${BUILD_TESTS} )  
+MESSAGE( STATUS "CMAKE_C_COMPILER: " ${CMAKE_C_COMPILER} )  
+MESSAGE( STATUS "CMAKE_CXX_COMPILER: " ${CMAKE_CXX_COMPILER} )  
+MESSAGE( STATUS "CMAKE_BUILD_TYPE: " ${CMAKE_BUILD_TYPE} )
+MESSAGE( STATUS "CMAKE_INSTALL_PREFIX: " ${CMAKE_INSTALL_PREFIX} )
+MESSAGE( STATUS "PROJECT_SOURCE_DIR: " ${PROJECT_SOURCE_DIR} )
+MESSAGE( STATUS "CMAKE_SOURCE_DIR: " ${CMAKE_SOURCE_DIR} )
+MESSAGE( STATUS "CMAKE_CURRENT_SOURCE_DIR: " ${CMAKE_CURRENT_SOURCE_DIR} )
+MESSAGE( STATUS "PROJECT_BINARY_DIR: " ${PROJECT_BINARY_DIR} )
+MESSAGE( STATUS "CMAKE_CURRENT_BINARY_DIR: " ${CMAKE_CURRENT_BINARY_DIR} )
+MESSAGE( STATUS "CMAKE_BINARY_DIR: " ${CMAKE_BINARY_DIR} )
+MESSAGE( STATUS "EXECUTABLE_OUTPUT_PATH: " "${EXECUTABLE_OUTPUT_PATH}" )
+MESSAGE( STATUS "LIBRARY_OUTPUT_PATH:     " "${LIBRARY_OUTPUT_PATH}" )
+MESSAGE( STATUS "CMAKE_MODULE_PATH: " "${CMAKE_MODULE_PATH}" )
+MESSAGE( STATUS "CMAKE_INCLUDE_PATH: " "${CMAKE_INCLUDE_PATH}" )
+MESSAGE( STATUS "CMAKE_PREFIX_PATH: " "${CMAKE_PREFIX_PATH}" )
+MESSAGE( STATUS "CMAKE_LIBRARY_PATH: " "${CMAKE_LIBRARY_PATH}" )
+MESSAGE( STATUS "CMAKE_SYSTEM_LIBRARY_PATH: " "${CMAKE_SYSTEM_LIBRARY_PATH}" )
+
+
+
+
