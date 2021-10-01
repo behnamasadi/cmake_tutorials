@@ -48,6 +48,7 @@
     + [TinyXML2](#tinyxml2)
     + [yaml-cpp](#yaml-cpp)
     + [Google Benchmark](#google-benchmark)
+    + [gRPC](#gRPC)
   * [Setting Important Variables](#setting-important-variables)
     + [C++17 support](#c--17-support)
     + [Position independent code](#position-independent-code)
@@ -743,8 +744,18 @@ pkg-config --modversion flann
 
 ### Flann
 ```
-find_package(PkgConfig)
-pkg_check_modules(PC_FLANN flann)
+pkg_search_module(FLANN REQUIRED flann)
+if(${FLANN_FOUND})
+    MESSAGE("FLANN_FOUND:" ${FLANN_FOUND})
+    MESSAGE("FLANN_VERSION:" ${FLANN_VERSION})
+    MESSAGE("FLANN_LIBRARIES:" ${FLANN_LIBRARIES})
+    MESSAGE("FLANN_INCLUDE_DIRS:" ${FLANN_INCLUDEDIR})
+    MESSAGE("FLANN_LIBRARY_DIRS:" ${FLANN_LIBDIR})
+    INCLUDE_DIRECTORIES(${FLANN_INCLUDEDIR})
+    LINK_DIRECTORIES(${FLANN_LIBDIR})
+    #ADD_EXECUTABLE(main src/main.cpp)
+    #TARGET_LINK_LIBRARIES(main ${FLANN_LIBRARIES})
+endif()
 ```
 
 ### TinyXML2
@@ -790,6 +801,29 @@ if(${BENCHMARK_FOUND})
     TARGET_LINK_LIBRARIES(benchmark_demo ${BENCHMARK_LIBRARIES} pthread)
 endif()
 ```
+
+### gRPC
+```
+find_package(PkgConfig REQUIRED)
+#for c
+pkg_search_module(GRPC REQUIRED grpc)
+
+#for c++
+pkg_search_module(GRPCPP REQUIRED grpc++)
+
+if(${GRPCPP_FOUND})
+    MESSAGE("GRPCPP_FOUND:" ${GRPCPP_FOUND})
+    MESSAGE("GRPCPP_VERSION:" ${GRPCPP_VERSION})
+    MESSAGE("GRPCPP_LIBRARIES:" ${GRPCPP_LIBRARIES})
+    MESSAGE("GRPCPP_INCLUDE_DIRS:" ${GRPCPP_INCLUDEDIR})
+    MESSAGE("GRPCPP_LIBRARY_DIRS:" ${GRPCPP_LIBDIR})
+    INCLUDE_DIRECTORIES(${GRPCPP_INCLUDEDIR})
+    LINK_DIRECTORIES(${GRPCPP_LIBDIR})
+    ADD_EXECUTABLE(main src/main.cpp)
+    TARGET_LINK_LIBRARIES(main ${GRPCPP_LIBRARIES})
+endif()
+```
+
 ## Setting Important Variables
 ### C++17 support
 ```
