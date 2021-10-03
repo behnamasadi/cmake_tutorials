@@ -48,7 +48,7 @@
     + [TinyXML2](#tinyxml2)
     + [yaml-cpp](#yaml-cpp)
     + [Google Benchmark](#google-benchmark)
-    + [gRPC](#gRPC)
+    + [gRPC](#grpc)
   * [Setting Important Variables](#setting-important-variables)
     + [C++17 support](#c--17-support)
     + [Position independent code](#position-independent-code)
@@ -59,9 +59,6 @@
   * [Running a Command in CMake](#running-a-command-in-cmake)
     + [At Configure Time](#at-configure-time)
     + [At Build Time](#at-build-time)
-
-
-
 
 # CMake Tutorials
 
