@@ -10,7 +10,8 @@
     + [Options](#options)
     + [Important Variables](#important-variables)
   * [Properties](#properties)
-  * [Generating solution for Visual Studio, Xcode :](#generating-solution-for-visual-studio--xcode--)
+  * [Generating solution for Visual Studio, Xcode](#generating-solution-for-visual-studio--xcode)
+    + [Xcode](#xcode)
     + [Visual Studio](#visual-studio)
   * [Parallel build](#parallel-build)
   * [Visualising dependency graph:](#visualising-dependency-graph-)
@@ -223,9 +224,12 @@ The second is a shortcut for setting several properties on one target
 `set_target_properties(TargetName PROPERTIES CXX_STANDARD 11)`
 
 
-## Generating solution for Visual Studio, Xcode :
+## Generating solution for Visual Studio, Xcode
 To use an IDE, either pass -G"name of IDE" if CMake can produce that IDE's files (like Xcode, Visual Studio), 
 or open the CMakeLists.txt file from your IDE if that IDE has built in support for CMake (CLion, QtCreator, many others).
+
+
+### Xcode
 
 ```
 cmake -GXcode ../   
@@ -266,7 +270,7 @@ cmake --build . --target docs
 ```
 buid and install (the installation path would be `CMAKE_INSTALL_PREFIX`)
 ```
-cmake --build . --target install --config Release
+cmake --build . --target all install --config Release
 ```
 
 ## Parallel build
