@@ -16,6 +16,7 @@
   * [Parallel build](#parallel-build)
   * [Visualising dependency graph:](#visualising-dependency-graph-)
   * [Lisiting all variables with description:](#lisiting-all-variables-with-description-)
+  * [Watch a variable](#watch-a-variable)
   * [Scripting in CMake](#scripting-in-cmake)
   * [Built-in Commands and Functions in CMake](#built-in-commands-and-functions-in-cmake)
     + [add_subdirectory()](#add-subdirectory--)
@@ -61,6 +62,8 @@
   * [Running a Command in CMake](#running-a-command-in-cmake)
     + [At Configure Time](#at-configure-time)
     + [At Build Time](#at-build-time)
+
+
 
 
 # CMake Tutorials
@@ -288,6 +291,10 @@ dot -Tsvg viz.dot -o viz.svg
 ## Lisiting all variables with description:
 ```
 -L[A][H]  
+```
+## Watch a variable
+```
+variable_watch
 ```
 ## Scripting in CMake
 
