@@ -3,6 +3,7 @@
   * [Setting the compiler](#setting-the-compiler)
     + [clang](#clang)
     + [gcc](#gcc)
+    + [Check Compiler and Version](#check-compiler-and-version)
   * [Cmake command Line Parameters](#cmake-command-line-parameters)
   * [CMake Variables, Cache Variables and Options](#cmake-variables--cache-variables-and-options)
     + [Variables](#variables)
@@ -54,6 +55,7 @@
     + [gRPC](#grpc)
   * [Setting Important Variables](#setting-important-variables)
     + [C++17 support](#c--17-support)
+    + [C++20 support](#c--20-support)
     + [Position independent code](#position-independent-code)
     + [Turning warning into errors](#turning-warning-into-errors)
     + [Finding Memory leaking, Stack and Heap overflow](#finding-memory-leaking--stack-and-heap-overflow)
@@ -62,9 +64,6 @@
   * [Running a Command in CMake](#running-a-command-in-cmake)
     + [At Configure Time](#at-configure-time)
     + [At Build Time](#at-build-time)
-
-
-
 
 # CMake Tutorials
 
@@ -110,6 +109,40 @@ export CXX=/usr/bin/clang++
 export CC=/usr/bin/gcc
 export CXX=/usr/bin/g++
 ```
+
+to use it inside of your CMakeLists.txt
+
+```
+option(USE_CLANG "build application with clang" OFF)
+
+if(USE_CLANG)
+        set (CMAKE_C_COMPILER             "/usr/bin/clang")
+        #set (CMAKE_C_FLAGS                "-Wall -std=c99")
+        set (CMAKE_C_FLAGS_DEBUG          "-g")
+        set (CMAKE_C_FLAGS_MINSIZEREL     "-Os -DNDEBUG")
+        set (CMAKE_C_FLAGS_RELEASE        "-O4 -DNDEBUG")
+        set (CMAKE_C_FLAGS_RELWITHDEBINFO "-O2 -g")
+
+        set (CMAKE_CXX_COMPILER             "/usr/bin/clang++")
+        set (CMAKE_CXX_FLAGS                "-Wall")
+        set (CMAKE_CXX_FLAGS_DEBUG          "-g")
+        set (CMAKE_CXX_FLAGS_MINSIZEREL     "-Os -DNDEBUG")
+        set (CMAKE_CXX_FLAGS_RELEASE        "-O4 -DNDEBUG")
+        set (CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g")
+
+        set (CMAKE_AR      "/usr/bin/llvm-ar")
+        set (CMAKE_LINKER  "/usr/bin/llvm-ld")
+        set (CMAKE_NM      "/usr/bin/llvm-nm")
+        set (CMAKE_OBJDUMP "/usr/bin/llvm-objdump")
+        set (CMAKE_RANLIB  "/usr/bin/llvm-ranlib")
+endif()
+```
+
+### Check Compiler and Version
+
+message("compiler is:" ${CMAKE_CXX_COMPILER_ID})
+message("compiler version:" ${CMAKE_CXX_COMPILER_VERSION})
+
 
 ## Cmake command Line Parameters
 
@@ -290,7 +323,7 @@ dot -Tsvg viz.dot -o viz.svg
 ```
 ## Lisiting all variables with description:
 ```
--L[A][H]  
+cmake -LAH   ../
 ```
 ## Watch a variable
 ```
@@ -314,6 +347,22 @@ endif()
 foreach() ... endforeach()
 ```
 
+writing conditions, checking string, values and 
+
+```
+if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND ${CMAKE_CXX_COMPILER_VERSION} GREATER_EQUAL 14 )
+	add_executable(foo src/foo.cpp)
+	target_link_libraries(foo)
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND ${CMAKE_CXX_COMPILER_VERSION} GREATER_EQUAL 13)
+	add_executable(foo src/foo.cpp)
+	target_link_libraries(foo)
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" AND ${CMAKE_CXX_COMPILER_VERSION} GREATER_EQUAL 1900)
+	add_executable(foo src/foo.cpp)
+	target_link_libraries(foo)
+endif()
+```
+
+Refs: [1](https://cmake.org/cmake/help/latest/manual/cmake-language.7.html)
 
 ## Built-in Commands and Functions in CMake
 
@@ -847,6 +896,15 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 ```
+
+### C++20 support
+```
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_BUILD_TYPE debug)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++2a")
+```
+
 
 ### Position independent code
 
