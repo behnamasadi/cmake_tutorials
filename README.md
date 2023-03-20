@@ -463,7 +463,7 @@ DESTINATION lib/cmake/Foo
 
 ## Communicating with your code
 ### Reading from CMake into your files
-configure_file command copies the content of the first parameter (Version.h.in) to second parameter (Version) and substitute all CMake variables it finds. If you want to avoid replacing existing ${} syntax in your input file, use the @ONLY keyword. Passing @ONLY option to configure_file forces CMake to not touch ${...} expressions but substitute only @VAR@ ones.
+`configure_file` command copies the content of the first parameter (Version.h.in) to second parameter (Version) and substitute all CMake variables it finds. If you want to avoid replacing existing `${}` syntax in your input file, use the `@ONLY` keyword. Passing `@ONLY` option to configure_file forces CMake to not touch `${...}` expressions but substitute only `@VAR@ `ones.
 
 ```
 configure_file(<input> <output> [@ONLY])
