@@ -296,6 +296,16 @@ and to build (you can use -v for verbose builds and -j N for parallel builds on 
 ```
 cmake --build . -v -j 8
 ```
+
+buid an specific taget from your CMakeLists, i.e.
+```
+add_executable(filesystem src/filesystem.cpp)
+target_link_libraries(filesystem)
+```
+can be build by:
+```
+cmake --build . --target filesystem
+```
 buid test
 ```
 cmake --build . --target test
