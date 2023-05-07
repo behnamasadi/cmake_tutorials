@@ -1,7 +1,7 @@
 - [CMake Tutorials](#cmake-tutorials)
-  * [Typical project structure](#typical-project-structure)
-  * [Setting the compiler](#setting-the-compiler)
-    + [Check Compiler and Version](#check-compiler-and-version)
+  * [Project Structure](#project-structure)
+  * [Setting The Compiler](#setting-the-compiler)
+    + [Check Compiler And Version](#check-compiler-and-version)
   * [CMake Command Line Parameters](#cmake-command-line-parameters)
   * [CMake Variables, Cache Variables and Options](#cmake-variables--cache-variables-and-options)
     + [Variables](#variables)
@@ -12,33 +12,25 @@
   * [CMake Generators](#cmake-generators)
   * [Building Project](#building-project)
   * [Visualising Dependency Graph:](#visualising-dependency-graph-)
-  * [Listing all variables with description:](#listing-all-variables-with-description-)
-  * [Watch a variable](#watch-a-variable)
+  * [Listing All Variables With Description:](#listing-all-variables-with-description-)
+  * [Watch a Variable](#watch-a-variable)
   * [Colorized Message](#colorized-message)
   * [Scripting in CMake](#scripting-in-cmake)
-  * [Built-in Commands and Functions in CMake](#built-in-commands-and-functions-in-cmake)
-    + [add_subdirectory()](#add-subdirectory--)
-    + [include()](#include--)
-    + [include_directories()](#include-directories--)
-    + [target_include_directories()](#target-include-directories--)
+  * [Built-in Commands And Functions in CMake](#built-in-commands-and-functions-in-cmake)
       - [PUBLIC, PRIVATE, and INTERFACE](#public--private--and-interface)
-    + [add_library()](#add-library--)
-    + [add_executable()](#add-executable--)
-    + [target_link_libraries()](#target-link-libraries--)
-    + [mark_as_advanced()](#mark-as-advanced--)
-    + [install()](#install--)
   * [Semantic Versioning](#semantic-versioning)
-  * [Communicating with your code](#communicating-with-your-code)
-    + [Reading from CMake into your files](#reading-from-cmake-into-your-files)
-    + [CMake reading from your files](#cmake-reading-from-your-files)
-  * [Testing](#testing)
-  * [GoogleTest](#googletest)
+    + [GitHub Automatic Releases From tags and  Release Management](#github-automatic-releases-from-tags-and--release-management)
+  * [Connecting CMake With Your Code](#connecting-cmake-with-your-code)
+    + [Reading From CMake Into Your Files](#reading-from-cmake-into-your-files)
+    + [CMake Reading From Your Files](#cmake-reading-from-your-files)
+  * [Testing with CMake](#testing-with-cmake)
+    + [GoogleTest](#googletest)
     + [Download method](#download-method)
     + [FetchContent](#fetchcontent)
   * [Exporting Your Project](#exporting-your-project)
     + [1) Adding Subproject](#1--adding-subproject)
-    + [2) Exporting build directory of your project.](#2--exporting-build-directory-of-your-project)
-    + [3) Installing your project and calling find_package()](#3--installing-your-project-and-calling-find-package--)
+    + [2) Exporting Build Directory of Your Project](#2--exporting-build-directory-of-your-project)
+    + [3) Installing Your Project And Calling find_package()](#3--installing-your-project-and-calling-find-package--)
     + [Find\<package\>.cmake](#find--package--cmake)
     + [\<package\>Config.cmake](#--package--configcmake)
   * [How to find CMake from arbitrary installed locations](#how-to-find-cmake-from-arbitrary-installed-locations)
@@ -47,12 +39,9 @@
     + [At Configure Time](#at-configure-time)
     + [At Build Time](#at-build-time)
 
-
-
-
 # CMake Tutorials
 
-##  Typical project structure
+##  Project Structure
 
 ```
 project  
@@ -83,7 +72,7 @@ project
 └──scripts  
      └──helper.py  
 ```
-## Setting the compiler
+## Setting The Compiler
 clang
 
 ```
@@ -125,7 +114,7 @@ if(USE_CLANG)
 endif()
 ```
 
-### Check Compiler and Version
+### Check Compiler And Version
 
 ```
 message("compiler is:" ${CMAKE_CXX_COMPILER_ID})
@@ -138,6 +127,7 @@ message("compiler version:" ${CMAKE_CXX_COMPILER_VERSION})
 -B `<path to build directory>`  
 -D `<cache variable>=<value>`  
 -G `<generator-name>`   
+
 ## CMake Variables, Cache Variables and Options
 
 ### Variables
@@ -343,7 +333,7 @@ to build (you can use `-v` for verbose builds and `-j N` for parallel builds on 
 cmake --build . -v -j 8
 ```
 
-buid an specific taget from your CMakeLists, i.e.
+buid an specific target from your CMakeLists, i.e.
 ```
 add_executable(filesystem src/filesystem.cpp)
 target_link_libraries(filesystem)
@@ -384,11 +374,11 @@ read more [here](https://cmake.org/cmake/help/latest/generator/Ninja%20Multi-Con
 cmake   --graphviz=viz.dot  --trace-source=CMakeLists.txt
 dot -Tsvg viz.dot -o viz.svg
 ```
-## Listing all variables with description:
+## Listing All Variables With Description:
 ```
 cmake -LAH   ../
 ```
-## Watch a variable
+## Watch a Variable
 In CMake, `variable_watch` is a feature that allows you to register a callback function that is called whenever the value of a CMake variable changes. This can be useful for performing certain actions whenever a variable is modified, such as updating other variables or files.
 
 Here's an example of how to use variable_watch in CMake:
@@ -451,6 +441,7 @@ message("${BoldWhite}This is BoldWhite\n\n${ColourReset}")
 
 
 Refs: [1](https://stackoverflow.com/questions/18968979/how-to-make-colorized-message-with-cmake)
+
 ## Scripting in CMake
 
 ```
@@ -486,7 +477,7 @@ endif()
 
 Refs: [1](https://cmake.org/cmake/help/latest/manual/cmake-language.7.html)
 
-## Built-in Commands and Functions in CMake
+## Built-in Commands And Functions in CMake
 
 Always use lowercase function names. Always user lower case. Upper case is for variables.
 The languages are C, CXX, Fortran, ASM, CUDA (CMake 3.8+), CSharp (3.8+), and SWIFT.
@@ -496,24 +487,25 @@ cmake_minimum_required(VERSION 3.1)
 project(my-cmake-project VERSION 1.2.3.4 DESCRIPTION "An example project with CMake" LANGUAGES CXX)  
 ```
 
-### add_subdirectory()
+**add_subdirectory()**
+
 Add a subdirectory to the build. The binary_dir specifies the directory in which to place the output files. The CMakeLists.txt in the added subdirectory will be called and executed.
 ```
 add_subdirectory(src)
 add_subdirectory(src binary_dir)
 ```
-### include()
+**include()**
 Load and run CMake code from the file given.
 ```
 include(someother.cmake)
 ```
-### include_directories()
+**include_directories()**
 tell cmake where to look for *.h files
 ```
 include_directories(${PROJECT_SOURCE_DIR}/include)
 ```
 
-### target_include_directories()
+**target_include_directories()**
 
 `include_directories(given_include_dir_path)` affects all the targets in its CMakeLists, as well as those in all sub directories added after the point of its call. They would have access to "given_include_dir_path" for including headers.
 
@@ -522,7 +514,7 @@ The target must have been created by a command such as `add_executable()` or `ad
 You should declare your public API of your library for the third-party applications, so you place them under `<project_root/include/project_name>`. You might have some headers that are being used only by your application and you don't need (or want) to give them to the public, so you place them under your source directory and use target_include_directories() to make them accessible by your target. Notice that, private headers should not be installed.
 
 #### PUBLIC, PRIVATE, and INTERFACE
-Other target couldbe compiled against your targets and they might need to access the headers that you have 
+Other target could be compiled against your targets and they might need to access the headers that you have 
 used in your target, by declaring them as `PUBLIC` other targets can have access to those include directories that you added
 to your target and by using `PRIVATE` those include directories are nly available for your target. For example:
 
@@ -530,7 +522,7 @@ to your target and by using `PRIVATE` those include directories are nly availabl
 
 `target_include_directories(A PUBLIC ${Boost_INCLUDE_DIRS})` if you use those Boost headers in your public header files, which are included BOTH in some of A's source files and might also be included in any other client of your A library.
 
-### add_library()
+**add_library()**
 create library "libtools"
 ```
 add_library(tools STATIC|SHARED|MODULE src/tools.cpp)
@@ -539,19 +531,19 @@ add_library(tools STATIC|SHARED|MODULE src/tools.cpp)
 
 [How to link your static/ shared library](Linking_to_Libraries)
 
-### add_executable()
+**add_executable()**
 Adds an executable target called <name> to be built from the source files listed. 
 
 ```
 add_executable(main [WIN32]  src/tools_main.cpp src/tools_lib.cpp)
 ```
-### target_link_libraries()
+**target_link_libraries()**
 Tell the linker to bind these objects together.
 ```
 target_link_libraries(main tools)
 ```
 
-### mark_as_advanced()
+**mark_as_advanced()**
 Mark the named cached variables as advanced. An advanced variable will not be displayed in any of the cmake GUIs unless the show advanced option is on, for instance to keep **CACHE**  clean:
 ```
 mark_as_advanced(
@@ -561,7 +553,7 @@ mark_as_advanced(
 )
 ```
 
-### install()
+**install()**
 
 When you call the `make install`  or `cmake --build . --target install` this command will be executed.
 In the following example, we export the properties of our TARGETS into an EXPORT callled FooTargets, so FooTargets know where we 
@@ -622,9 +614,13 @@ std::string appVersion()
     return std::string(APP_VERSION);
 }
 ```
+### GitHub Automatic Releases From tags and  Release Management 
 
-## Communicating with your code
-### Reading from CMake into your files
+Refs: [1](https://github.com/marketplace/actions/automatic-releases), [2](https://docs.github.com/en/repositories/releasing-projects-on-github/managing-releases-in-a-repository)
+
+## Connecting CMake With Your Code
+
+### Reading From CMake Into Your Files
 `configure_file` command copies the content of the first parameter (Version.h.in) to second parameter (Version) and substitute all CMake variables it finds. If you want to avoid replacing existing `${}` syntax in your input file, use the `@ONLY` keyword. Passing `@ONLY` option to configure_file forces CMake to not touch `${...}` expressions but substitute only `@VAR@ `ones.
 
 ```
@@ -653,7 +649,7 @@ The content of "Version.h" will be
 #define MY_VERSION "1.2.3.4"
 ```
 
-### CMake reading from your files
+### CMake Reading From Your Files
 
 ```
 file(READ "${CMAKE_CURRENT_SOURCE_DIR}/include/project/Version.hpp" VERSION)
@@ -673,7 +669,7 @@ message(STATUS "VERSION: ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}")
 
 
 
-## Testing
+## Testing with CMake
 You can use **ctest** to test your **unittests**. In your main CMakelist.txt:
 
 ```
@@ -724,7 +720,7 @@ ctest -S build.cmake
 ```
 And then send the results to a dashboard server.
 
-## GoogleTest
+### GoogleTest
 If you want to use google test for performing your unit test, first let's add it as submodule into your extern/googletest directory in your project:
 
 ```
@@ -805,7 +801,7 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
 endif()
 ```
 
-### 2) Exporting build directory of your project.  
+### 2) Exporting Build Directory of Your Project  
 To use the build directory of one project in another project, you will need to export targets.
 ```
 export(TARGETS taget1 target2  FILE MyLibTargets.cmake)
@@ -819,7 +815,7 @@ export(PACKAGE MyLib)
 Now, if you find_package(MyLib), CMake can find the build folder.
 
 
-### 3) Installing your project and calling find_package()
+### 3) Installing Your Project And Calling find_package()
 Let say you have the following project:
 ```
 root
@@ -848,6 +844,7 @@ include( "${CMAKE_CURRENT_LIST_DIR}/MyPackTargets.cmake" )
 ```
 
 The content of CMakeLists.txt:
+
 ```
 cmake_minimum_required(VERSION 3.1)
 
@@ -892,7 +889,6 @@ write_basic_package_version_file(
   COMPATIBILITY SameMajorVersion
   )
 
-### Install Config and ConfigVersion files
 install(
   FILES "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_PROJECT_NAME}Config.cmake"
         "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_PROJECT_NAME}ConfigVersion.cmake"
