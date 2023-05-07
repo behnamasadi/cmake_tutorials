@@ -1,23 +1,20 @@
 - [CMake Tutorials](#cmake-tutorials)
   * [Typical project structure](#typical-project-structure)
   * [Setting the compiler](#setting-the-compiler)
-    + [clang](#clang)
-    + [gcc](#gcc)
     + [Check Compiler and Version](#check-compiler-and-version)
-  * [Cmake command Line Parameters](#cmake-command-line-parameters)
+  * [CMake Command Line Parameters](#cmake-command-line-parameters)
   * [CMake Variables, Cache Variables and Options](#cmake-variables--cache-variables-and-options)
     + [Variables](#variables)
     + [Cache Variables](#cache-variables)
     + [Options](#options)
-    + [Important Variables](#important-variables)
+  * [Setting Important Variables](#setting-important-variables)
   * [Properties](#properties)
-  * [Generating solution for Visual Studio, Xcode](#generating-solution-for-visual-studio--xcode)
-    + [Xcode](#xcode)
-    + [Visual Studio](#visual-studio)
-  * [Parallel build](#parallel-build)
-  * [Visualising dependency graph:](#visualising-dependency-graph-)
-  * [Lisiting all variables with description:](#lisiting-all-variables-with-description-)
+  * [CMake Generators](#cmake-generators)
+  * [Building Project](#building-project)
+  * [Visualising Dependency Graph:](#visualising-dependency-graph-)
+  * [Listing all variables with description:](#listing-all-variables-with-description-)
   * [Watch a variable](#watch-a-variable)
+  * [Colorized Message](#colorized-message)
   * [Scripting in CMake](#scripting-in-cmake)
   * [Built-in Commands and Functions in CMake](#built-in-commands-and-functions-in-cmake)
     + [add_subdirectory()](#add-subdirectory--)
@@ -30,6 +27,7 @@
     + [target_link_libraries()](#target-link-libraries--)
     + [mark_as_advanced()](#mark-as-advanced--)
     + [install()](#install--)
+  * [Semantic Versioning](#semantic-versioning)
   * [Communicating with your code](#communicating-with-your-code)
     + [Reading from CMake into your files](#reading-from-cmake-into-your-files)
     + [CMake reading from your files](#cmake-reading-from-your-files)
@@ -44,26 +42,13 @@
     + [Find\<package\>.cmake](#find--package--cmake)
     + [\<package\>Config.cmake](#--package--configcmake)
   * [How to find CMake from arbitrary installed locations](#how-to-find-cmake-from-arbitrary-installed-locations)
-    + [PCL point cloud](#pcl-point-cloud)
-    + [OpenCV](#opencv)
-    + [glog](#glog)
   * [Using pkgconfig (.pc files)](#using-pkgconfig--pc-files-)
-    + [Flann](#flann)
-    + [TinyXML2](#tinyxml2)
-    + [yaml-cpp](#yaml-cpp)
-    + [Google Benchmark](#google-benchmark)
-    + [gRPC](#grpc)
-  * [Setting Important Variables](#setting-important-variables)
-    + [C++17 support](#c--17-support)
-    + [C++20 support](#c--20-support)
-    + [Position independent code](#position-independent-code)
-    + [Turning warning into errors](#turning-warning-into-errors)
-    + [Finding Memory leaking, Stack and Heap overflow](#finding-memory-leaking--stack-and-heap-overflow)
-    + [Turning off the warning from unused variables](#turning-off-the-warning-from-unused-variables)
-    + [Setting build type](#setting-build-type)
   * [Running a Command in CMake](#running-a-command-in-cmake)
     + [At Configure Time](#at-configure-time)
     + [At Build Time](#at-build-time)
+
+
+
 
 # CMake Tutorials
 
@@ -99,12 +84,14 @@ project
      └──helper.py  
 ```
 ## Setting the compiler
-### clang
+clang
+
 ```
 export CC=/usr/bin/clang
 export CXX=/usr/bin/clang++
 ```
-### gcc
+gcc
+
 ```
 export CC=/usr/bin/gcc
 export CXX=/usr/bin/g++
@@ -140,11 +127,12 @@ endif()
 
 ### Check Compiler and Version
 
+```
 message("compiler is:" ${CMAKE_CXX_COMPILER_ID})
 message("compiler version:" ${CMAKE_CXX_COMPILER_VERSION})
+```
 
-
-## Cmake command Line Parameters
+## CMake Command Line Parameters
 
 -S `<path to source directory>`   
 -B `<path to build directory>`  
@@ -195,7 +183,7 @@ MESSAGE( STATUS "root: " ${BAR} )
 
 
 ### Cache Variables
-If you want to set a variable from the command line, CMake offers a variable cache. For example yu can define `MY_LIBRARY_VERSION`. The syntax for declaring a variable and setting it if it is not already set is:
+If you want to set a variable from the command line, CMake offers a variable cache. For example you can define `MY_LIBRARY_VERSION`. The syntax for declaring a variable and setting it if it is not already set is:
 ```
 set(MY_CACHE_VARIABLE "VALUE" CACHE STRING "Description")
 ```
@@ -210,7 +198,7 @@ set(MY_LIBRARY_VERSION_MAJOR 1 CACHE STRING "major version" FORCE)
 These are common CMake options to most packages:
 
 `-DCMAKE_BUILD_TYPE` Pick from Release, RelWithDebInfo, Debug, or sometimes more.  
-`-DCMAKE_INSTALL_PREFIX` The location to install to. System install on UNIX would often be /usr/local (the default), user directories are often ~/.local, or you can pick a folder.  
+`-DCMAKE_INSTALL_PREFIX` The location to install to. System install on UNIX would often be `/usr/local` (the default), user directories are often `~/.local`, or you can pick a folder.  
 `-DBUILD_SHARED_LIBS` You can set this ON or OFF to control the default for shared libraries (the author can pick one vs. the other explicitly instead of using the default, though)  
 `-DBUILD_TESTING` This is a common name for enabling tests, not all packages use it, though, sometimes with good reason.  
 
@@ -220,8 +208,69 @@ Options provide an option for the user to select as ON or OFF.
 ```
 option(PACKAGE_TESTS "Build the tests" ON)
 ```
+## Setting Important Variables
+- C++17 support
+```
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+```
 
-### Important Variables
+-  C++20 support
+```
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_BUILD_TYPE debug)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++2a")
+```
+
+
+-  Position independent code
+
+Globally:
+```
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+```
+Explicitly turn it ON (or OFF) for a target:
+
+```
+set_target_properties(lib1 PROPERTIES POSITION_INDEPENDENT_CODE ON)
+```
+
+-  Turning warning into errors
+```
+if(MSVC)
+  # Force to always compile with W4
+  if(CMAKE_CXX_FLAGS MATCHES "/W[0-4]")
+    string(REGEX REPLACE "/W[0-4]" "/W4" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+  else()
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
+  endif()
+elseif(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
+  # Update if necessary
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-long-long -pedantic")
+endif()
+```
+
+-  Finding Memory leaking, Stack and Heap overflow
+```
+set(CMAKE_CXX_FLAGS "-fsanitize=address ${CMAKE_CXX_FLAGS}")
+set(CMAKE_CXX_FLAGS "-fno-omit-frame-pointer ${CMAKE_CXX_FLAGS}")
+```
+
+-  Turning off the warning from unused variables
+```
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-variable")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-private-field")
+```
+
+-  Setting build type
+```
+set(CMAKE_BUILD_TYPE DEBUG|RELEASE)
+```
+
+
+-  List Of Important Variables
 
 ```
 MESSAGE( STATUS "PROJECT_NAME: " ${PROJECT_NAME} )  
@@ -260,59 +309,64 @@ The second is a shortcut for setting several properties on one target
 `set_target_properties(TargetName PROPERTIES CXX_STANDARD 11)`
 
 
-## Generating solution for Visual Studio, Xcode
-To use an IDE, either pass -G"name of IDE" if CMake can produce that IDE's files (like Xcode, Visual Studio), 
-or open the CMakeLists.txt file from your IDE if that IDE has built in support for CMake (CLion, QtCreator, many others).
+## CMake Generators
+A CMake Generator is responsible for writing the input files for a native build system. Use `-G` option to specify the generator for a new build tree. 
 
+- Makefile Generators
 
-### Xcode
+For instance: `cmake -G"Unix Makefiles" -S ..`
 
-```
-cmake -GXcode ../   
-cmake -G "Unix Makefiles"  ../  
-```
-### Visual Studio
-Visual Studio 2019:
-```
-cmake -G"Visual Studio 16" ..
-```
+- Ninja Generators: `Ninja` and `Ninja Multi-Config` (First install the packages: `sudo apt install ninja-build`)
+
+For instance: `cmake -G Ninja -S ..`
+
+- IDE Build Tool Generators: for instance `Visual Studio 17 2022` or `Visual Studio 16 2019`
 
 Visual Studio 2017
-```
-cmake -G"Visual Studio 15" ..
-```
 
-Visual Studio 2015 
-```
-cmake -G"Visual Studio 14" ..
-```                   
-Visual Studio 2013
-``
-cmake -G"Visual Studio 12" ..
-``
+For instance: `cmake -G"Visual Studio 15" ..`
 
-and to build (you can use -v for verbose builds and -j N for parallel builds on N cores) :
+You can check the generator used to build the project via `CMAKE_GENERATOR`.
+
+```
+MESSAGE( STATUS "CMAKE_GENERATOR: " ${CMAKE_GENERATOR} )
+```
+The value of this variable should **never** be modified by project code. on use `-G` option to set it.
+
+
+
+## Building Project
+
+to build (you can use `-v` for verbose builds and `-j N` for parallel builds on N cores) :
 
 ```
 cmake --build . -v -j 8
 ```
-buid test
+build test
 ```
 cmake --build . --target test
 ```
-buid docs
+build docs
 ```
 cmake --build . --target docs
 ```
-buid and install (the installation path would be `CMAKE_INSTALL_PREFIX`)
+build and install (the installation path would be `CMAKE_INSTALL_PREFIX`)
 ```
 cmake --build . --target all install --config Release
 ```
 
-## Parallel build
-` cmake ../ && cmake  --build . --parallel`
+to build Ninja Multi-Config:
+```
+cmake --build . --config <Config>
+```
 
-## Visualising dependency graph:
+
+read more [here](https://cmake.org/cmake/help/latest/generator/Ninja%20Multi-Config.html)
+
+
+`cmake -S .. -B. && cmake  --build .  --parallel` or `cmake -S .. -B. && cmake  --build . -j`
+
+## Visualising Dependency Graph:
 
 --graphviz=[dependency graph outfile]  
 --trace-source=CMakeLists.txt  
@@ -321,14 +375,73 @@ cmake --build . --target all install --config Release
 cmake   --graphviz=viz.dot  --trace-source=CMakeLists.txt
 dot -Tsvg viz.dot -o viz.svg
 ```
-## Lisiting all variables with description:
+## Listing all variables with description:
 ```
 cmake -LAH   ../
 ```
 ## Watch a variable
+In CMake, `variable_watch` is a feature that allows you to register a callback function that is called whenever the value of a CMake variable changes. This can be useful for performing certain actions whenever a variable is modified, such as updating other variables or files.
+
+Here's an example of how to use variable_watch in CMake:
+
 ```
-variable_watch
+# Define a variable "MY_VAR" with an initial value of "foo"
+set(MY_VAR "foo")
+
+# Define a function to be called when the variable changes
+function(on_my_var_change varname varvalue)
+    message("The value of variable ${varname} has changed to ${varvalue}")
+endfunction()
+
+# Register the callback function to be called whenever "MY_VAR" changes
+variable_watch(MY_VAR on_my_var_change)
+
+# Change the value of "MY_VAR" to "bar"
+set(MY_VAR "bar")
 ```
+
+## Colorized Message
+```
+if(NOT WIN32)
+  string(ASCII 27 Esc)
+  set(ColourReset "${Esc}[m")
+  set(ColourBold  "${Esc}[1m")
+  set(Red         "${Esc}[31m")
+  set(Green       "${Esc}[32m")
+  set(Yellow      "${Esc}[33m")
+  set(Blue        "${Esc}[34m")
+  set(Magenta     "${Esc}[35m")
+  set(Cyan        "${Esc}[36m")
+  set(White       "${Esc}[37m")
+  set(BoldRed     "${Esc}[1;31m")
+  set(BoldGreen   "${Esc}[1;32m")
+  set(BoldYellow  "${Esc}[1;33m")
+  set(BoldBlue    "${Esc}[1;34m")
+  set(BoldMagenta "${Esc}[1;35m")
+  set(BoldCyan    "${Esc}[1;36m")
+  set(BoldWhite   "${Esc}[1;37m")
+endif()
+
+message("This is normal")
+message("${Red}This is Red${ColourReset}")
+message("${Green}This is Green${ColourReset}")
+message("${Yellow}This is Yellow${ColourReset}")
+message("${Blue}This is Blue${ColourReset}")
+message("${Magenta}This is Magenta${ColourReset}")
+message("${Cyan}This is Cyan${ColourReset}")
+message("${White}This is White${ColourReset}")
+message("${BoldRed}This is BoldRed${ColourReset}")
+message("${BoldGreen}This is BoldGreen${ColourReset}")
+message("${BoldYellow}This is BoldYellow${ColourReset}")
+message("${BoldBlue}This is BoldBlue${ColourReset}")
+message("${BoldMagenta}This is BoldMagenta${ColourReset}")
+message("${BoldCyan}This is BoldCyan${ColourReset}")
+message("${BoldWhite}This is BoldWhite\n\n${ColourReset}")
+```
+
+
+
+Refs: [1](https://stackoverflow.com/questions/18968979/how-to-make-colorized-message-with-cmake)
 ## Scripting in CMake
 
 ```
@@ -461,6 +574,46 @@ DESTINATION lib/cmake/Foo
 )
 ```
 
+## Semantic Versioning
+
+The scheme is based on a three-part version number, in the format of `MAJOR.MINOR.PATCH`:
+
+- MAJOR version number is incremented when there are significant changes to the software that are not backward compatible with previous versions. 
+
+- MINOR version number is incremented when new features or functionality are added to the software in a backward-compatible manner. 
+
+- PATCH version number is incremented when bug fixes or small changes are made to the software, also in a backward-compatible manner.
+
+Each element MUST increase numerically, For instance: `1.9.0` -> `1.10.0` -> `1.11.0`.
+
+If we release a pre-release version of the software before the final release, we can add a pre-release identifier to the version number, such as 1.3.0-alpha.1, to indicate that it is not the final release and may contain bugs.
+
+If we need to add build metadata, such as the build date or build number, we can add it as a build metadata identifier after the version number, such as `1.2.3+20230507`.
+
+
+For instance: `1.0.0` -> `1.0.1` -> `1.0.2`-> `2.0.0+25` -> `2.0.0+32` -> `2.0.0`.
+
+Refs: [1](https://blogs.stonesteps.ca/1/p/80), [2](https://semver.org/)
+
+
+so to set the version from git tags into the software:
+
+```
+execute_process(COMMAND "git" "describe" 
+                OUTPUT_VARIABLE GIT_DESCRIBE_VERSION_TAG
+                OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+target_compile_definitions(main PRIVATE APP_VERSION="${GIT_DESCRIBE_VERSION_TAG}")
+```
+now in the cpp file:
+
+```cpp
+std::string appVersion()
+{
+    return std::string(APP_VERSION);
+}
+```
+
 ## Communicating with your code
 ### Reading from CMake into your files
 configure_file command copies the content of the first parameter (Version.h.in) to second parameter (Version) and substitute all CMake variables it finds. If you want to avoid replacing existing ${} syntax in your input file, use the @ONLY keyword. Passing @ONLY option to configure_file forces CMake to not touch ${...} expressions but substitute only @VAR@ ones.
@@ -479,7 +632,7 @@ Content of Version.h.in
 #define MY_VERSION_TWEAK @PROJECT_VERSION_TWEAK@
 #define MY_VERSION "@PROJECT_VERSION@"
 ```
-The conntet of "Version.h" will be 
+The content of "Version.h" will be 
 
 ```
 #pragma once
@@ -771,23 +924,29 @@ message("MyPack_VERSION: " ${MyPack_VERSION} )
 ## How to find CMake from arbitrary installed locations
 
 Here I gathered several examples:
-### PCL point cloud
+- PCL point cloud
 ```
 set(PCL_DIR "$ENV{HOME}/usr/share/pcl-1.8/")
 ```
 
-### OpenCV
+- OpenCV
 ```
 set(OpenCV_DIR "$ENV{HOME}/usr/share/OpenCV/")
 ```
 
-### glog
+- glog
 ```
 cmake  -Dglog_DIR=~/usr/lib/cmake/glog/
 ```
 
+- VTK
+```
+set(VTK_DIR "$ENV{HOME}/usr/lib/cmake/vtk-9.2/")
+```
+
+
 ## Using pkgconfig (.pc files)
-I ususally install my program in my home directorym therefore everything goes into
+I usually install my program in my home directory therefore everything goes into
 ```
 <home>/usr/lib/
 <home>/usr/include
@@ -805,7 +964,7 @@ pkg-config --libs flann
 pkg-config --modversion flann
 ```
 
-### Flann
+- Flann
 ```
 pkg_search_module(FLANN REQUIRED flann)
 if(${FLANN_FOUND})
@@ -821,7 +980,7 @@ if(${FLANN_FOUND})
 endif()
 ```
 
-### TinyXML2
+- TinyXML2
 ```
 SET(ENV{PKG_CONFIG_PATH} "$ENV{HOME}/usr/lib/pkgconfig:" $ENV{PKG_CONFIG_PATH})
 MESSAGE("PKG_CONFIG_PATH:" $ENV{PKG_CONFIG_PATH})
@@ -839,7 +998,7 @@ if(${TINYXML2_FOUND})
     TARGET_LINK_LIBRARIES(tinyxml2_demo ${TINYXML2_LIBRARIES})
 endif()
 ```
-### yaml-cpp
+- yaml-cpp
 ```
 SET(yaml-cpp_DIR "$ENV{HOME}/usr/share/cmake/yaml-cpp")  
 FIND_PACKAGE(yaml-cpp)  
@@ -851,7 +1010,7 @@ IF(${yaml-cpp_FOUND})
 ENDIF()
 ```
 
-### Google Benchmark
+- Google Benchmark
 ```
 pkg_check_modules(BENCHMARK benchmark)
 if(${BENCHMARK_FOUND})
@@ -867,7 +1026,7 @@ if(${BENCHMARK_FOUND})
 endif()
 ```
 
-### gRPC
+- gRPC
 ```
 find_package(PkgConfig REQUIRED)
 #for c
@@ -889,66 +1048,7 @@ if(${GRPCPP_FOUND})
 endif()
 ```
 
-## Setting Important Variables
-### C++17 support
-```
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
-```
 
-### C++20 support
-```
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_BUILD_TYPE debug)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++2a")
-```
-
-
-### Position independent code
-
-Globally:
-```
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-```
-Explicitly turn it ON (or OFF) for a target:
-
-```
-set_target_properties(lib1 PROPERTIES POSITION_INDEPENDENT_CODE ON)
-```
-
-### Turning warning into errors
-```
-if(MSVC)
-  # Force to always compile with W4
-  if(CMAKE_CXX_FLAGS MATCHES "/W[0-4]")
-    string(REGEX REPLACE "/W[0-4]" "/W4" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-  else()
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
-  endif()
-elseif(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
-  # Update if necessary
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-long-long -pedantic")
-endif()
-```
-
-### Finding Memory leaking, Stack and Heap overflow
-```
-set(CMAKE_CXX_FLAGS "-fsanitize=address ${CMAKE_CXX_FLAGS}")
-set(CMAKE_CXX_FLAGS "-fno-omit-frame-pointer ${CMAKE_CXX_FLAGS}")
-```
-
-### Turning off the warning from unused variables
-```
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-variable")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-private-field")
-```
-
-### Setting build type
-```
-set(CMAKE_BUILD_TYPE DEBUG|RELEASE)
-```
 
 ## Running a Command in CMake
 
@@ -1003,5 +1103,5 @@ References:[1](https://gist.github.com/mbinna/),
 [![Build Status](https://travis-ci.com/behnamasadi/cmake_tutorials.svg?branch=master)](https://travis-ci.com/behnamasadi/cmake_tutorials)
 ![alt text](https://img.shields.io/badge/license-BSD-blue.svg)  
 
-<small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
+
 

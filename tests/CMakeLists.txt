@@ -9,7 +9,6 @@ project(${PROJECT}_tests DESCRIPTION "An example of GTest" LANGUAGES CXX)
 ###
 include_directories(${EXTERN_INCLUDES} ${MY_PROJECT_INCLUDES})
 
-
 ###
 # libraries
 ###
