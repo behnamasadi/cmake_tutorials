@@ -342,7 +342,16 @@ to build (you can use `-v` for verbose builds and `-j N` for parallel builds on 
 ```
 cmake --build . -v -j 8
 ```
-build test
+
+buid an specific taget from your CMakeLists, i.e.
+```
+add_executable(filesystem src/filesystem.cpp)
+target_link_libraries(filesystem)
+```
+can be build by:
+```
+cmake --build . --target filesystem
+```
 ```
 cmake --build . --target test
 ```
@@ -616,7 +625,7 @@ std::string appVersion()
 
 ## Communicating with your code
 ### Reading from CMake into your files
-configure_file command copies the content of the first parameter (Version.h.in) to second parameter (Version) and substitute all CMake variables it finds. If you want to avoid replacing existing ${} syntax in your input file, use the @ONLY keyword. Passing @ONLY option to configure_file forces CMake to not touch ${...} expressions but substitute only @VAR@ ones.
+`configure_file` command copies the content of the first parameter (Version.h.in) to second parameter (Version) and substitute all CMake variables it finds. If you want to avoid replacing existing `${}` syntax in your input file, use the `@ONLY` keyword. Passing `@ONLY` option to configure_file forces CMake to not touch `${...}` expressions but substitute only `@VAR@ `ones.
 
 ```
 configure_file(<input> <output> [@ONLY])
