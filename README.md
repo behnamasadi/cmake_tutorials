@@ -10,6 +10,8 @@
   * [Setting Important Variables](#setting-important-variables)
   * [Properties](#properties)
   * [CMake Generators](#cmake-generators)
+  * [setting buyild type with DCMAKE_BUILD_TYPE and Ninja Multi-Config](#setting-buyild-type-with-dcmake-build-type-and-ninja-multi-config)
+  * [VScode and Ninja Multi-Config](#vscode-and-ninja-multi-config)
   * [Building Project](#building-project)
   * [Visualising Dependency Graph:](#visualising-dependency-graph-)
   * [Listing All Variables With Description:](#listing-all-variables-with-description-)
@@ -302,15 +304,15 @@ The second is a shortcut for setting several properties on one target
 ## CMake Generators
 A CMake Generator is responsible for writing the input files for a native build system. Use `-G` option to specify the generator for a new build tree. 
 
-- Makefile Generators
+1. Makefile Generators
 
 For instance: `cmake -G"Unix Makefiles" -S ..`
 
-- Ninja Generators: `Ninja` and `Ninja Multi-Config` (First install the packages: `sudo apt install ninja-build`)
+2. Ninja Generators: `Ninja` and `Ninja Multi-Config` (First install the packages: `sudo apt install ninja-build`)
 
 For instance: `cmake -G Ninja -S ..`
 
-- IDE Build Tool Generators: for instance `Visual Studio 17 2022` or `Visual Studio 16 2019`
+3. IDE Build Tool Generators: for instance `Visual Studio 17 2022` or `Visual Studio 16 2019`
 
 Visual Studio 2017
 
@@ -323,7 +325,43 @@ MESSAGE( STATUS "CMAKE_GENERATOR: " ${CMAKE_GENERATOR} )
 ```
 The value of this variable should **never** be modified by project code. on use `-G` option to set it.
 
+## setting buyild type with DCMAKE_BUILD_TYPE and Ninja Multi-Config
 
+The Ninja build system in relation to CMake's `-DCMAKE_BUILD_TYPE` and `--config` options has a slightly complex story due to the introduction of the Ninja Multi-Config generator in newer CMake versions. Let's break it down:
+
+1. **Traditional Ninja (Single-Config)**:
+    - **Configuration Phase**: You use `-DCMAKE_BUILD_TYPE` to specify the build type (e.g., Debug, Release).
+      ```bash
+      cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Release -S [path to source] -B build
+      ```
+    - **Build Phase**: When you run `ninja`, it will build the `Release` configuration (based on the earlier example).
+    - `--config` is not relevant for this variant of Ninja because it's a single-config generator. There's only one build type configured per build directory.
+
+2. **Ninja Multi-Config (Experimental as of CMake 3.17 and later)**:
+    - **Configuration Phase**: You don't specify a build type with `-DCMAKE_BUILD_TYPE` during configuration. Instead, you'd just configure with:
+      ```bash
+      cmake -G "Ninja Multi-Config" -S [path to source] -B build
+      ```
+    - **Build Phase**: You choose the build configuration when invoking the build. This can be done in a couple of ways:
+      - Using the `cmake --build` command and the `--config` option:
+        ```bash
+        cmake --build build --config Release
+        ```
+
+    - With Ninja Multi-Config, you can switch between different configurations (like Debug, Release) in the same build directory without reconfiguring.
+
+## VScode and Ninja Multi-Config
+
+Add the following settings to your **settings.json** located at `/home/$USER/.config/Code/User` or press `ctrl+shift+p` to open it
+
+```
+{
+  "cmake.configureSettings": {
+    "CMAKE_EXPORT_COMPILE_COMMANDS": "YES"
+  },
+  "cmake.generator": "Ninja Multi-Config"
+}
+```
 
 ## Building Project
 
@@ -333,7 +371,7 @@ to build (you can use `-v` for verbose builds and `-j N` for parallel builds on 
 cmake --build . -v -j 8
 ```
 
-buid an specific target from your CMakeLists, i.e.
+build an specific target from your CMakeLists, i.e.
 ```
 add_executable(filesystem src/filesystem.cpp)
 target_link_libraries(filesystem)
@@ -364,6 +402,7 @@ read more [here](https://cmake.org/cmake/help/latest/generator/Ninja%20Multi-Con
 
 
 `cmake -S .. -B. && cmake  --build .  --parallel` or `cmake -S .. -B. && cmake  --build . -j`
+
 
 ## Visualising Dependency Graph:
 
