@@ -10,7 +10,7 @@
   * [Setting Important Variables](#setting-important-variables)
   * [Properties](#properties)
   * [CMake Generators](#cmake-generators)
-  * [setting buyild type with DCMAKE_BUILD_TYPE and Ninja Multi-Config](#setting-buyild-type-with-dcmake-build-type-and-ninja-multi-config)
+  * [setting build type with DCMAKE_BUILD_TYPE and Ninja Multi-Config](#setting-build-type-with-dcmake-build-type-and-ninja-multi-config)
   * [VScode and Ninja Multi-Config](#vscode-and-ninja-multi-config)
   * [Building Project](#building-project)
   * [Visualising Dependency Graph:](#visualising-dependency-graph-)
@@ -325,7 +325,7 @@ MESSAGE( STATUS "CMAKE_GENERATOR: " ${CMAKE_GENERATOR} )
 ```
 The value of this variable should **never** be modified by project code. on use `-G` option to set it.
 
-## setting buyild type with DCMAKE_BUILD_TYPE and Ninja Multi-Config
+## setting build type with DCMAKE_BUILD_TYPE and Ninja Multi-Config
 
 The Ninja build system in relation to CMake's `-DCMAKE_BUILD_TYPE` and `--config` options has a slightly complex story due to the introduction of the Ninja Multi-Config generator in newer CMake versions. Let's break it down:
 
@@ -361,6 +361,82 @@ Add the following settings to your **settings.json** located at `/home/$USER/.co
   },
   "cmake.generator": "Ninja Multi-Config"
 }
+```
+
+
+## CMakePresets.json and CMakeUserPresets.json
+
+`CMakePresets.json` and `CMakeUserPresets.json` both have exactly the same format, `CMakePresets.json` is meant to specify project-wide build details, while `CMakeUserPresets.json` is meant for developers to specify their own local build details. meaning, if a project is using Git, `CMakePresets.json` may be tracked, and `CMakeUserPresets.json` should be added to the `.gitignore`.
+
+
+Here is a simple example of a `CMakePresets.json` file:
+```
+{
+  "version": 3,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 19,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "ninja-multi",
+      "displayName": "Ninja Multi-Config",
+      "description": "Use Ninja with multiple configurations",
+      "generator": "Ninja Multi-Config",
+      "binaryDir": "${sourceDir}/out/build/${presetName}",
+      "cacheVariables": {
+        "CMAKE_POLICY_DEFAULT_CMP0048": "NEW",
+        "CMAKE_CONFIGURATION_TYPES": "Debug;Release;RelWithDebInfo;MinSizeRel"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "ninja-multi-debug",
+      "configurePreset": "ninja-multi",
+      "configuration": "Debug"
+    },
+    {
+      "name": "ninja-multi-release",
+      "configurePreset": "ninja-multi",
+      "configuration": "Release"
+    },
+    {
+      "name": "ninja-multi-relwithdebinfo",
+      "configurePreset": "ninja-multi",
+      "configuration": "RelWithDebInfo"
+    },
+    {
+      "name": "ninja-multi-minsizerel",
+      "configurePreset": "ninja-multi",
+      "configuration": "MinSizeRel"
+    }
+  ]
+}
+```
+
+
+To configure and build a specific configuration using these presets, you would use commands similar to the following, replacing `<preset-name>` with the desired build preset name (e.g., ninja-multi-debug):
+
+```
+cmake --preset ninja-multi
+cmake --build --preset <preset-name>
+```
+
+If you prefer `preset` use:
+
+```
+cmake --preset ninja-multi
+```
+and 
+
+```
+cmake --build --preset ninja-multi-debug
+```
+or 
+```
+cmake --build --preset ninja-multi-release
 ```
 
 ## Building Project
