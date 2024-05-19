@@ -1202,6 +1202,190 @@ add_custom_target(generate_header ALL
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/include/Generated.hpp DESTINATION include)
 ```
 
+
+
+## Creating and Installing a library 
+
+Create the following structure:
+
+```
+MainProject/
+├── CMakeLists.txt
+├── CMakeLists.txt.user
+├── MyLibrary
+│   ├── CMakeLists.txt
+│   ├── include
+│   │   └── MyLibrary.hpp
+│   └── src
+│       └── MyLibrary.cpp
+└── src
+    └── main.cpp
+```
+Now inside of `MainProject/MyLibrary/CMakeLists.txt`:
+
+```cmake
+cmake_minimum_required(VERSION 3.10)  # Minimum required CMake version
+
+project(MyLibrary VERSION 1.0.0 LANGUAGES CXX)  # Project name and version with C++ as the language
+
+# Add the source files to create the library
+add_library(MyLibrary SHARED
+    src/MyLibrary.cpp
+)
+
+# Specify the include directories for users of the library
+target_include_directories(MyLibrary PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>  # Include directory during build
+    $<INSTALL_INTERFACE:include>  # Include directory after installation
+)
+
+# Set properties for the library such as version and public header
+set_target_properties(MyLibrary PROPERTIES
+    VERSION ${PROJECT_VERSION}  # Version of the library
+    SOVERSION 1  # Shared object version
+    PUBLIC_HEADER include/MyLibrary.hpp  # Header file to be installed and used by users
+)
+
+# Specify where to install the built library and its associated files
+install(TARGETS MyLibrary
+    EXPORT MyLibraryConfig  # Export library configuration for use in other projects
+    LIBRARY DESTINATION lib  # Destination for shared libraries
+    ARCHIVE DESTINATION lib  # Destination for static libraries
+    RUNTIME DESTINATION bin  # Destination for executables
+    INCLUDES DESTINATION include  # Destination for include files
+    PUBLIC_HEADER DESTINATION include  # Destination for public header file
+)
+
+# Install the export configuration for the library
+install(EXPORT MyLibraryConfig NAMESPACE MyLibrary:: DESTINATION cmake)
+```
+
+
+The line `SOVERSION 1` in CMake sets the version number of the shared object (shared library) being built. 
+
+In Unix-like operating systems, shared libraries are typically versioned to allow multiple versions of the same library to coexist on a system. This versioning is helpful for backward compatibility and ensures that programs compiled against an older version of the library will continue to work with newer versions, provided backward compatibility is maintained.
+
+The `SOVERSION` property sets the version number of the shared object file itself. It's separate from the project version specified in the `project()` command. It's particularly important when generating shared libraries because it's used to construct the actual filename of the shared library. 
+
+For example, if your library is named `libMyLibrary.so` and you set `SOVERSION 1`, then the actual filename of the shared library would be `libMyLibrary.so.1`. This version number is embedded into the filename to distinguish between different versions of the library.
+
+In CMake, setting `SOVERSION` to `1` in your `CMakeLists.txt` file would result in the generated shared library having a version number of `1`. If you were to release a major update to your library, you might increment this version number to `2`, and so on, to distinguish between different versions of your library's shared object files.
+
+
+Now in the `MainProject/CMakeLists.txt`:
+
+```cmake
+cmake_minimum_required(VERSION 3.10)
+project(MainProject VERSION 1.0.0 LANGUAGES CXX)
+
+add_subdirectory(MyLibrary)
+
+add_executable(MainProject src/main.cpp)
+
+target_link_libraries(MainProject MyLibrary)
+
+install(TARGETS MainProject
+    EXPORT MainProjectConfig
+    RUNTIME DESTINATION bin
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+    INCLUDES DESTINATION include
+)
+
+install(EXPORT MainProjectConfig NAMESPACE MainProject:: DESTINATION cmake)
+```
+configure it:
+
+
+```
+cmake -G "Ninja Multi-Config" -S . -B build -DCMAKE_INSTALL_PREFIX=~/usr
+```
+
+build it:
+
+```
+cmake --build build --config Release
+```
+
+
+```
+cmake --install build --config Release
+```
+This will install the followings:
+
+
+```
+/home/behnam/usr/
+├── bin
+│   └── MainProject
+├── cmake
+│   ├── MainProjectConfig.cmake
+│   ├── MainProjectConfig-release.cmake
+│   ├── MyLibraryConfig.cmake
+│   └── MyLibraryConfig-release.cmake
+├── include
+│   └── MyLibrary.hpp
+└── lib
+    ├── libMyLibrary.so -> libMyLibrary.so.1
+    ├── libMyLibrary.so.1 -> libMyLibrary.so.1.0.0
+    └── libMyLibrary.so.1.0.0
+```
+
+Now let say we want to use the `MyLibrary` in another project, 
+
+```
+AnotherProject/
+├── CMakeLists.txt
+└── src
+    └── main.cpp
+```
+
+In the `AnotherProject/CMakeLists.txt`:
+
+
+```cmake
+cmake_minimum_required(VERSION 3.10)
+project(AnotherProject VERSION 1.0.0 LANGUAGES CXX)
+
+find_package(MyLibrary REQUIRED)
+
+add_executable(AnotherProject src/main.cpp)
+
+target_link_libraries(AnotherProject MyLibrary::MyLibrary)
+```
+
+you can optionally add the followings to all related variables to `MyLibrary`:
+
+```cmake
+# Print variables related to foo
+get_cmake_property(_variableNames VARIABLES)
+foreach (_variableName ${_variableNames})
+  if (_variableName MATCHES "^MyLibrary")
+    message(STATUS "${_variableName}=${${_variableName}}")
+  endif()
+endforeach()
+
+# Print imported targets
+get_property(_targets GLOBAL PROPERTY IMPORTED_TARGETS)
+foreach(_target ${_targets})
+  if(_target MATCHES "^MyLibrary::")
+    message(STATUS "Imported target: ${_target}")
+  endif()
+endforeach()
+```
+
+Now run this:
+
+```
+cmake -G "Ninja Multi-Config" -S . -B build -DCMAKE_PREFIX_PATH=~/usr -DCMAKE_INSTALL_PREFIX=~/usr
+cmake --build build --config Debug
+cmake --install build --config Debug
+```
+
+
+
+
+
 References:[1](https://gist.github.com/mbinna/), 
 [2](https://cliutils.gitlab.io/modern-cmake/),
 [3](https://stackoverflow.com/questions/20746936/what-use-is-find-package-if-you-need-to-specify-cmake-module-path-anyway),
