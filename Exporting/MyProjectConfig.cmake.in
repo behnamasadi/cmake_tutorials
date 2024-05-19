@@ -4,5 +4,13 @@
 
 include("${CMAKE_CURRENT_LIST_DIR}/MyProjectTargets.cmake")
 
-set_and_check(MY_PROJECT_INCLUDE_DIRS "${CMAKE_INSTALL_PREFIX}/include")
+# Define the include directory for the project
+set(MY_PROJECT_INCLUDE_DIRS "${CMAKE_INSTALL_PREFIX}/include")
+
+# Define the libraries for the project
+set(MY_PROJECT_LIBRARIES MyProject::my_library)
+
+# Make the variables available to the parent scope
+set(MyProject_INCLUDE_DIRS "${MY_PROJECT_INCLUDE_DIRS}" CACHE INTERNAL "")
+set(MyProject_LIBRARIES "${MY_PROJECT_LIBRARIES}" CACHE INTERNAL "")
 
