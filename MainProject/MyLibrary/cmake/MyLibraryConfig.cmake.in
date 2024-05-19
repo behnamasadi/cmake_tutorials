@@ -1,0 +1,8 @@
+# Check if the package has already been imported
+if(NOT TARGET MyLibrary::MyLibrary)
+
+    # Include the targets file for the library
+    include(${CMAKE_CURRENT_LIST_DIR}/MyLibraryTargets.cmake)
+
+endif()
+

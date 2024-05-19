@@ -931,85 +931,104 @@ Now, if you find_package(MyLib), CMake can find the build folder.
 
 
 ### 3) Installing Your Project And Calling find_package()
-Let say you have the following project:
+Let say you have the following [project](Exporting):
 ```
-root
-├── Lib1
-│   └── CMakeLists.txt
-|   └── src.cpp
-└── CMakeLists.txt
-└── Config.cmake.in
+Exporting/
+├── CMakeLists.txt
+├── include
+│   └── my_header.h
+├── MyProjectConfig.cmake.in
+└── src
+    ├── main.cpp
+    └── my_source_file.cpp
+```
+
+The content of `Exporting/MyProjectConfig.cmake.in`:
 
 ```
-The content of Lib1/CMakeLists.txt:
-```
-add_library(lib1 src.cpp)
-add_library(${CMAKE_PROJECT_NAME}::lib1 ALIAS lib1)
-include(GNUInstallDirs)
-install( 
-  TARGETS lib1
-  EXPORT ${CMAKE_PROJECT_NAME}Targets
-  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-  )
-```
-The content of Config.cmake.in:
-```
+# MyProjectConfig.cmake.in
+
 @PACKAGE_INIT@
-include( "${CMAKE_CURRENT_LIST_DIR}/MyPackTargets.cmake" )
+
+include("${CMAKE_CURRENT_LIST_DIR}/MyProjectTargets.cmake")
+
+set_and_check(MY_PROJECT_INCLUDE_DIRS "${CMAKE_INSTALL_PREFIX}/include")
 ```
 
-The content of CMakeLists.txt:
-
-```
-cmake_minimum_required(VERSION 3.1)
-
-set(CMAKE_PROJECT_NAME "MyPack")
-project(${CMAKE_PROJECT_NAME})
-
-set(CMAKE_INSTALL_PREFIX "X:/install")
-set(CMAKE_BUILD_TYPE RELEASE)
-
-set(MAJOR_VERSION 2)
-set(MINOR_VERSION 1)
-set(PATCH_VERSION 6)
-set(TWEAK_VERSION 4)
-set(VERSION    "${MAJOR_VERSION}.${MINOR_VERSION}.${PATCH_VERSION}.${TWEAK_VERSION}"    )
+The content of `CMakeLists.txt`:
 
 
-message("VERSION: " ${VERSION})
+```cmake
+cmake_minimum_required(VERSION 3.0)
+project(MyProject VERSION 1.0)
 
-add_subdirectory(Lib1) 
-#add_subdirectory(Lib2) 
+# Add source files
+set(SOURCES
+    src/my_source_file.cpp
+    src/main.cpp
+)
 
+# Add header files
+set(HEADERS
+    include/my_header.h
+)
 
-install(
-  EXPORT ${CMAKE_PROJECT_NAME}Targets
-  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${CMAKE_PROJECT_NAME}
-  NAMESPACE ${CMAKE_PROJECT_NAME}::
-  FILE ${CMAKE_PROJECT_NAME}Targets.cmake 
-  )
+# Define the library
+add_library(my_library ${SOURCES})
 
+# Specify include directories
+target_include_directories(my_library
+    PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+
+# Install targets and files
+install(TARGETS my_library
+    EXPORT MyProjectTargets
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+    RUNTIME DESTINATION bin
+    INCLUDES DESTINATION include
+)
+install(FILES ${HEADERS} DESTINATION include)
+
+# Export targets
+install(EXPORT MyProjectTargets
+    FILE MyProjectTargets.cmake
+    NAMESPACE MyProject::
+    DESTINATION lib/cmake/MyProject
+)
+
+# Configure package config file
 include(CMakePackageConfigHelpers)
-configure_package_config_file( 
-  "Config.cmake.in" 
-  "${CMAKE_PROJECT_NAME}Config.cmake"
-  INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${CMAKE_PROJECT_NAME}
-  PATH_VARS
-    CMAKE_INSTALL_LIBDIR
-  )
+set(CONFIG_INSTALL_DIR lib/cmake/MyProject)
+configure_package_config_file(${CMAKE_CURRENT_SOURCE_DIR}/MyProjectConfig.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/MyProjectConfig.cmake
+    INSTALL_DESTINATION ${CONFIG_INSTALL_DIR}
+)
+write_basic_package_version_file(${CMAKE_CURRENT_BINARY_DIR}/MyProjectConfigVersion.cmake
+    VERSION ${PROJECT_VERSION}
+    COMPATIBILITY SameMajorVersion
+)
 
-write_basic_package_version_file(
-  ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_PROJECT_NAME}ConfigVersion.cmake
-  VERSION ${VERSION}
-  COMPATIBILITY SameMajorVersion
-  )
+# Install package config files
+install(FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/MyProjectConfig.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/MyProjectConfigVersion.cmake
+    DESTINATION ${CONFIG_INSTALL_DIR}
+)
 
-install(
-  FILES "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_PROJECT_NAME}Config.cmake"
-        "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_PROJECT_NAME}ConfigVersion.cmake"
-  DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${CMAKE_PROJECT_NAME}"
-  )
 ```
+
+In this CMakeLists.txt file:
+
+- The `configure_package_config_file` command generates the package configuration file `MyProjectConfig.cmake`.
+- The `write_basic_package_version_file` command generates the version file `MyProjectConfigVersion.cmake`.
+- Both generated files are installed into the appropriate location (`lib/cmake/MyProject`).
+- Ensure that you have a template file `MyProjectConfig.cmake.in` which specifies how your library should be configured when imported by other projects. This file typically includes commands like `include(Targets)` to include the exported targets from `MyProjectTargets.cmake`.
+
+
 
 Once you exported and installed and your project, you can call `find_package`. find_package() has the following parameter:  
 `find_package(<package> [version] [EXACT] [QUIET] [MODULE] [REQUIRED] [[COMPONENTS] )` finds and loads settings from an external project.
@@ -1018,6 +1037,41 @@ The `QUIET` option disables messages if the package cannot be found.
 The `REQUIRED` option stops processing with an error message if the package cannot be found.  
 `<package>_FOUND`  will be set to indicate whether the package was found.  
 The `version` argument requests a version with which the package found should be compatible (format is major[.minor[.patch[.tweak]]]). 	
+
+
+
+Now run:
+
+```
+cmake -G "Ninja Multi-Config" -S . -B build -DCMAKE_PREFIX_PATH=~/usr -DCMAKE_INSTALL_PREFIX=~/usr
+cmake --build build --config Debug
+cmake --install build --config Debug
+```
+
+After that you can use in [Consumer](ExportingConsumer)
+```
+cmake_minimum_required(VERSION 3.0)
+project(ConsumerProject)
+
+# Find MyProject
+find_package(MyProject REQUIRED)
+
+# Add source files
+set(SOURCES
+    src/consumer_source.cpp
+)
+
+# Add executable
+add_executable(consumer_executable ${SOURCES})
+
+# Link with MyProject library
+target_link_libraries(consumer_executable PRIVATE MyProject::my_library)
+
+# Specify include directories
+target_include_directories(consumer_executable PRIVATE ${MyProject_INCLUDE_DIRS})
+```
+
+
 
 
 Command `find_package` has two modes: `Module` mode and `Config` mode. 
@@ -1260,7 +1314,7 @@ install(TARGETS MyLibrary
 install(EXPORT MyLibraryConfig NAMESPACE MyLibrary:: DESTINATION cmake)
 ```
 
-
+### SOVERSION
 The line `SOVERSION 1` in CMake sets the version number of the shared object (shared library) being built. 
 
 In Unix-like operating systems, shared libraries are typically versioned to allow multiple versions of the same library to coexist on a system. This versioning is helpful for backward compatibility and ensures that programs compiled against an older version of the library will continue to work with newer versions, provided backward compatibility is maintained.
@@ -1270,6 +1324,27 @@ The `SOVERSION` property sets the version number of the shared object file itsel
 For example, if your library is named `libMyLibrary.so` and you set `SOVERSION 1`, then the actual filename of the shared library would be `libMyLibrary.so.1`. This version number is embedded into the filename to distinguish between different versions of the library.
 
 In CMake, setting `SOVERSION` to `1` in your `CMakeLists.txt` file would result in the generated shared library having a version number of `1`. If you were to release a major update to your library, you might increment this version number to `2`, and so on, to distinguish between different versions of your library's shared object files.
+
+
+
+
+
+### MyLibraryConfig
+
+The `MyLibraryConfig` export configuration is generated using the `install(EXPORT ...)` command. This command exports targets defined in the project for use by other projects. 
+
+In your `CMakeLists.txt`, you're exporting the target `MyLibrary` with the namespace `MyLibrary::`. This means that when other projects use `MyLibraryConfig`, they can reference the target `MyLibrary` as `MyLibrary::MyLibrary`.
+
+Here's how `MyLibraryConfig` is generated in your `CMakeLists.txt`:
+
+```cmake
+# Install the export configuration for the library
+install(EXPORT MyLibraryConfig NAMESPACE MyLibrary:: DESTINATION cmake)
+```
+
+This command tells CMake to install the export configuration named `MyLibraryConfig` with the namespace `MyLibrary::` into the `cmake` directory of the installation prefix. This export configuration will contain information about the target `MyLibrary` and its properties, such as include directories, compile options, and dependencies. Other projects can then import this configuration using `find_package(MyLibrary CONFIG)`, which will make the target `MyLibrary::MyLibrary` available for use in their CMakeLists.txt.
+
+
 
 
 Now in the `MainProject/CMakeLists.txt`:

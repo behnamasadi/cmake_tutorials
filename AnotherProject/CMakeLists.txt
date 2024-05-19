@@ -1,7 +1,8 @@
 cmake_minimum_required(VERSION 3.10)
 project(AnotherProject VERSION 1.0.0 LANGUAGES CXX)
 
-find_package(MyLibrary REQUIRED)
+#find_package(MyLibrary REQUIRED)
+find_package(MyLibrary CONFIG)
 
 # Print variables related to foo
 get_cmake_property(_variableNames VARIABLES)

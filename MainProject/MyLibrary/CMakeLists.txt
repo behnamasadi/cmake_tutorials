@@ -32,3 +32,4 @@ install(TARGETS MyLibrary
 
 # Install the export configuration for the library
 install(EXPORT MyLibraryConfig NAMESPACE MyLibrary:: DESTINATION cmake)
+
