@@ -12,6 +12,7 @@
   * [CMake Generators](#cmake-generators)
   * [setting build type with DCMAKE_BUILD_TYPE and Ninja Multi-Config](#setting-build-type-with-dcmake-build-type-and-ninja-multi-config)
   * [VScode and Ninja Multi-Config](#vscode-and-ninja-multi-config)
+  * [CMakePresets.json and CMakeUserPresets.json](#cmakepresetsjson-and-cmakeuserpresetsjson)
   * [Building Project](#building-project)
   * [Visualising Dependency Graph:](#visualising-dependency-graph-)
   * [Listing All Variables With Description:](#listing-all-variables-with-description-)
@@ -30,9 +31,10 @@
     + [Download method](#download-method)
     + [FetchContent](#fetchcontent)
   * [Exporting Your Project](#exporting-your-project)
-    + [1) Adding Subproject](#1--adding-subproject)
-    + [2) Exporting Build Directory of Your Project](#2--exporting-build-directory-of-your-project)
-    + [3) Installing Your Project And Calling find_package()](#3--installing-your-project-and-calling-find-package--)
+    + [1. Adding Subproject](#1-adding-subproject)
+    + [2. Exporting Build Directory of Your Project](#2-exporting-build-directory-of-your-project)
+    + [3. Installing Your Project And Calling find_package()](#3-installing-your-project-and-calling-find-package--)
+    + [Explanation of MyProjectConfig.cmake.in](#explanation-of-myprojectconfigcmakein)
     + [Find\<package\>.cmake](#find--package--cmake)
     + [\<package\>Config.cmake](#--package--configcmake)
   * [How to find CMake from arbitrary installed locations](#how-to-find-cmake-from-arbitrary-installed-locations)
@@ -40,6 +42,9 @@
   * [Running a Command in CMake](#running-a-command-in-cmake)
     + [At Configure Time](#at-configure-time)
     + [At Build Time](#at-build-time)
+  * [Creating and Installing a library](#creating-and-installing-a-library)
+    + [SOVERSION](#soversion)
+    + [MyLibraryConfig](#mylibraryconfig)
 
 # CMake Tutorials
 
@@ -907,7 +912,7 @@ endif()
 ## Exporting Your Project
 
 There are 3 ways to access your project from another project:  
-### 1) Adding Subproject
+### 1. Adding Subproject
 Adding your project with add_subdirectory().  For small and header only libraries, you can just use add_subdirectory() and include the entire  porject.
 You can use **CMAKE_CURRENT_SOURCE_DIR** instead of **PROJECT_SOURCE_DIR** and 
 ```
@@ -916,7 +921,7 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
 endif()
 ```
 
-### 2) Exporting Build Directory of Your Project  
+### 2. Exporting Build Directory of Your Project  
 To use the build directory of one project in another project, you will need to export targets.
 ```
 export(TARGETS taget1 target2  FILE MyLibTargets.cmake)
@@ -930,7 +935,7 @@ export(PACKAGE MyLib)
 Now, if you find_package(MyLib), CMake can find the build folder.
 
 
-### 3) Installing Your Project And Calling find_package()
+### 3. Installing Your Project And Calling find_package()
 Let say you have the following [project](Exporting):
 ```
 Exporting/
@@ -1027,6 +1032,55 @@ In this CMakeLists.txt file:
 - The `write_basic_package_version_file` command generates the version file `MyProjectConfigVersion.cmake`.
 - Both generated files are installed into the appropriate location (`lib/cmake/MyProject`).
 - Ensure that you have a template file `MyProjectConfig.cmake.in` which specifies how your library should be configured when imported by other projects. This file typically includes commands like `include(Targets)` to include the exported targets from `MyProjectTargets.cmake`.
+
+
+
+### Explanation of MyProjectConfig.cmake.in
+
+The `MyProjectConfig.cmake.in` file is a template used to generate the final `MyProjectConfig.cmake` file during the installation process. It typically includes commands and variables needed to configure the package for use in other CMake projects.
+
+Here's a breakdown of the content of `MyProjectConfig.cmake.in`:
+
+1. `@PACKAGE_INIT@`: This is a placeholder that will be replaced with initialization code when the final `MyProjectConfig.cmake` file is generated. The initialization code typically sets up variables and macros needed for the package.
+
+2. `include("${CMAKE_CURRENT_LIST_DIR}/MyProjectTargets.cmake")`: This line includes the `MyProjectTargets.cmake` file, which defines the targets (e.g., libraries, executables) provided by `MyProject` and their properties.
+
+3. `set_and_check(MY_PROJECT_INCLUDE_DIRS "${CMAKE_INSTALL_PREFIX}/include")`: This line sets the `MY_PROJECT_INCLUDE_DIRS` variable to the path where the header files of `MyProject` are installed. `${CMAKE_INSTALL_PREFIX}` is a CMake variable representing the installation prefix specified during installation. This line ensures that consumers of `MyProject` can include its header files using this variable.
+
+Here are a few examples of what else you can include in `MyProjectConfig.cmake.in`:
+
+- **Setting Variables**: You can set variables to provide configuration options for consumers. For example:
+
+  ```cmake
+  set(MY_PROJECT_USE_FEATURE_XYZ ON)
+  ```
+
+- **Configuring Compiler Flags**: You can configure compiler flags or options that are specific to `MyProject`. For example:
+
+  ```cmake
+  if(MSVC)
+      set(MY_PROJECT_MSVC_FLAGS "/W3 /EHsc")
+  else()
+      set(MY_PROJECT_GCC_FLAGS "-Wall -Wextra")
+  endif()
+  ```
+
+- **Defining Macros**: You can define macros that can be used by consumers or within the project itself. For example:
+
+  ```cmake
+  add_definitions(-DMY_PROJECT_USE_SOME_FEATURE)
+  ```
+
+- **Setting Dependencies**: If `MyProject` depends on other libraries, you can set variables or provide information about these dependencies. For example:
+
+  ```cmake
+  set(MY_PROJECT_REQUIRED_LIBRARIES SomeOtherLibrary)
+  ```
+
+These examples demonstrate how you can customize `MyProjectConfig.cmake.in` to provide additional information and configurations for consumers of `MyProject`. When consumers use `find_package(MyProject)`, the generated `MyProjectConfig.cmake` file will contain this information, making it easier for them to use `MyProject` in their projects.
+
+
+
 
 
 

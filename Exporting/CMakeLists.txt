@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0)
-project(MyProject VERSION 3.2.4)
+project(MyProject VERSION 3.5.1)
 
 # Add source files
 set(SOURCES
@@ -39,7 +39,7 @@ install(EXPORT MyProjectTargets
     DESTINATION lib/cmake/MyProject
 )
 
-# Configure package config file
+# Generate and install package config files
 include(CMakePackageConfigHelpers)
 set(CONFIG_INSTALL_DIR lib/cmake/MyProject)
 configure_package_config_file(${CMAKE_CURRENT_SOURCE_DIR}/MyProjectConfig.cmake.in
@@ -50,8 +50,6 @@ write_basic_package_version_file(${CMAKE_CURRENT_BINARY_DIR}/MyProjectConfigVers
     VERSION ${PROJECT_VERSION}
     COMPATIBILITY SameMajorVersion
 )
-
-# Install package config files
 install(FILES
     ${CMAKE_CURRENT_BINARY_DIR}/MyProjectConfig.cmake
     ${CMAKE_CURRENT_BINARY_DIR}/MyProjectConfigVersion.cmake
