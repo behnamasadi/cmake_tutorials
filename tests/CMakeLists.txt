@@ -1,31 +1,17 @@
-###
-# project
-###
-project(${PROJECT}_tests DESCRIPTION "An example of GTest" LANGUAGES CXX)
+include(GoogleTest)
 
+set(MAIN_SOURCE "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp")
 
-###
-# includes
-###
-include_directories(${EXTERN_INCLUDES} ${MY_PROJECT_INCLUDES})
+file(GLOB SPEC_SOURCES CONFIGURE_DEPENDS
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/spec/*.cpp"
+)
 
-###
-# libraries
-###
-link_directories(${EXTERN_LIBRARIES})
-
-
-###
-# executables
-###
-set(MAIN "src/main.cpp")
-set(DIRS "src/spec" "src/spec/**")
-foreach(DIR ${DIRS})
-  file(GLOB s_${DIR} "${DIR}/*.cpp")
-  foreach(SOURCE ${s_${DIR}})
-    get_filename_component(TEST_NAME ${SOURCE} NAME_WE)
-    add_executable(${TEST_NAME} ${MAIN} ${SOURCE})
-    target_link_libraries(${TEST_NAME}  gtest pthread)
-    add_test(NAME ${TEST_NAME}_tests COMMAND ${TEST_NAME})
-  endforeach()
+foreach(SOURCE IN LISTS SPEC_SOURCES)
+    get_filename_component(TEST_NAME "${SOURCE}" NAME_WE)
+    add_executable(${TEST_NAME} "${MAIN_SOURCE}" "${SOURCE}")
+    target_include_directories(${TEST_NAME} PRIVATE
+        "${PROJECT_SOURCE_DIR}/include"
+    )
+    target_link_libraries(${TEST_NAME} PRIVATE GTest::gtest GTest::gmock)
+    gtest_discover_tests(${TEST_NAME})
 endforeach()

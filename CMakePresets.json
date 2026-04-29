@@ -1,0 +1,41 @@
+{
+  "version": 6,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 25,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "ninja-multi",
+      "displayName": "Ninja Multi-Config",
+      "description": "Use Ninja with multiple configurations",
+      "generator": "Ninja Multi-Config",
+      "binaryDir": "${sourceDir}/out/build/${presetName}",
+      "cacheVariables": {
+        "CMAKE_CONFIGURATION_TYPES": "Debug;Release;RelWithDebInfo;MinSizeRel",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+      }
+    }
+  ],
+  "buildPresets": [
+    { "name": "ninja-multi-debug",          "configurePreset": "ninja-multi", "configuration": "Debug" },
+    { "name": "ninja-multi-release",        "configurePreset": "ninja-multi", "configuration": "Release" },
+    { "name": "ninja-multi-relwithdebinfo", "configurePreset": "ninja-multi", "configuration": "RelWithDebInfo" },
+    { "name": "ninja-multi-minsizerel",     "configurePreset": "ninja-multi", "configuration": "MinSizeRel" }
+  ],
+  "testPresets": [
+    {
+      "name": "ninja-multi-debug",
+      "configurePreset": "ninja-multi",
+      "configuration": "Debug",
+      "output": { "outputOnFailure": true }
+    },
+    {
+      "name": "ninja-multi-release",
+      "configurePreset": "ninja-multi",
+      "configuration": "Release",
+      "output": { "outputOnFailure": true }
+    }
+  ]
+}

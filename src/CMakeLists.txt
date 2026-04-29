@@ -1,69 +1,30 @@
-###
-# core
-###
-add_library(core core/lib.cpp)
-
-
-install(TARGETS core
-        EXPORT coreTargets
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib
-        RUNTIME DESTINATION bin
-        INCLUDES DESTINATION include)
-
-
-
 include(CMakePackageConfigHelpers)
-write_basic_package_version_file(
-    coreConfigVersion.cmake
-    VERSION ${PACKAGE_VERSION}
-    COMPATIBILITY AnyNewerVersion
+
+foreach(LIB IN ITEMS core auxiliary misc)
+    if(LIB STREQUAL "auxiliary")
+        set(LIB_SOURCE core/lib.cpp)
+    else()
+        set(LIB_SOURCE ${LIB}/lib.cpp)
+    endif()
+
+    add_library(${LIB} ${LIB_SOURCE})
+
+    target_include_directories(${LIB} PUBLIC
+        $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:include>
     )
-    
-    
-###
-# aux
-###
-    
-    
-add_library(aux core/lib.cpp)
 
+    install(TARGETS ${LIB}
+        EXPORT   ${LIB}Targets
+        LIBRARY  DESTINATION lib
+        ARCHIVE  DESTINATION lib
+        RUNTIME  DESTINATION bin
+        INCLUDES DESTINATION include
+    )
 
-install(TARGETS aux
-        EXPORT auxTargets
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib
-        RUNTIME DESTINATION bin
-        INCLUDES DESTINATION include)
-
-
-
-include(CMakePackageConfigHelpers)
-write_basic_package_version_file(
-    auxConfigVersion.cmake
-    VERSION ${PACKAGE_VERSION}
-    COMPATIBILITY AnyNewerVersion
-    )    
-    
-    
-###
-# misc
-###
-    
-add_library(misc misc/lib.cpp)
-
-install(TARGETS misc
-        EXPORT miscTargets
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib
-        RUNTIME DESTINATION bin
-        INCLUDES DESTINATION include)
-
-
-
-include(CMakePackageConfigHelpers)
-write_basic_package_version_file(
-    miscConfigVersion.cmake
-    VERSION ${PACKAGE_VERSION}
-    COMPATIBILITY AnyNewerVersion
-    )    
+    write_basic_package_version_file(
+        ${LIB}ConfigVersion.cmake
+        VERSION       ${PROJECT_VERSION}
+        COMPATIBILITY AnyNewerVersion
+    )
+endforeach()
