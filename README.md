@@ -28,8 +28,7 @@
     + [MyLibraryConfig](#mylibraryconfig)
   * [Exporting Your Project](#exporting-your-project)
     + [1. Adding a Subproject](#1-adding-a-subproject)
-    + [2. Exporting the Build Directory](#2-exporting-the-build-directory)
-    + [3. Installing and Calling find_package()](#3-installing-and-calling-find_package)
+    + [2. Installing and Calling find_package()](#2-installing-and-calling-find_package)
     + [Explanation of MyProjectConfig.cmake.in](#explanation-of-myprojectconfigcmakein)
     + [Find\<package\>.cmake](#findpackagecmake)
     + [\<package\>Config.cmake](#packageconfigcmake)
@@ -44,8 +43,6 @@
   * [Diagnostics](#diagnostics)
     + [Visualising the Dependency Graph](#visualising-the-dependency-graph)
     + [Listing All Variables with Description](#listing-all-variables-with-description)
-    + [Watch a Variable](#watch-a-variable)
-    + [Colorized Messages](#colorized-messages)
 
 # CMake Tutorials
 
@@ -889,22 +886,7 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
 endif()
 ```
 
-### 2. Exporting the Build Directory
-
-Export targets so another project can consume the build tree directly without installing:
-
-```cmake
-export(TARGETS target1 target2 FILE MyLibTargets.cmake)
-```
-
-Register the package so `find_package(MyLib)` can find the build folder:
-
-```cmake
-set(CMAKE_EXPORT_PACKAGE_REGISTRY ON)
-export(PACKAGE MyLib)
-```
-
-### 3. Installing and Calling find_package()
+### 2. Installing and Calling find_package()
 
 Given:
 
@@ -1363,64 +1345,6 @@ dot -Tsvg build/viz.dot -o build/viz.svg
 ```bash
 cmake -LAH -S . -B build
 ```
-
-### Watch a Variable
-
-`variable_watch` registers a callback that fires whenever the variable's value changes. Useful when you need to drive other variables or files off a setting.
-
-```cmake
-set(MY_VAR "foo")
-
-function(on_my_var_change varname varvalue)
-    message(STATUS "The value of variable ${varname} has changed to ${varvalue}")
-endfunction()
-
-variable_watch(MY_VAR on_my_var_change)
-
-set(MY_VAR "bar")   # triggers on_my_var_change
-```
-
-### Colorized Messages
-
-```cmake
-if(NOT WIN32)
-    string(ASCII 27 Esc)
-    set(ColourReset "${Esc}[m")
-    set(ColourBold  "${Esc}[1m")
-    set(Red         "${Esc}[31m")
-    set(Green       "${Esc}[32m")
-    set(Yellow      "${Esc}[33m")
-    set(Blue        "${Esc}[34m")
-    set(Magenta     "${Esc}[35m")
-    set(Cyan        "${Esc}[36m")
-    set(White       "${Esc}[37m")
-    set(BoldRed     "${Esc}[1;31m")
-    set(BoldGreen   "${Esc}[1;32m")
-    set(BoldYellow  "${Esc}[1;33m")
-    set(BoldBlue    "${Esc}[1;34m")
-    set(BoldMagenta "${Esc}[1;35m")
-    set(BoldCyan    "${Esc}[1;36m")
-    set(BoldWhite   "${Esc}[1;37m")
-endif()
-
-message("This is normal")
-message("${Red}This is Red${ColourReset}")
-message("${Green}This is Green${ColourReset}")
-message("${Yellow}This is Yellow${ColourReset}")
-message("${Blue}This is Blue${ColourReset}")
-message("${Magenta}This is Magenta${ColourReset}")
-message("${Cyan}This is Cyan${ColourReset}")
-message("${White}This is White${ColourReset}")
-message("${BoldRed}This is BoldRed${ColourReset}")
-message("${BoldGreen}This is BoldGreen${ColourReset}")
-message("${BoldYellow}This is BoldYellow${ColourReset}")
-message("${BoldBlue}This is BoldBlue${ColourReset}")
-message("${BoldMagenta}This is BoldMagenta${ColourReset}")
-message("${BoldCyan}This is BoldCyan${ColourReset}")
-message("${BoldWhite}This is BoldWhite\n\n${ColourReset}")
-```
-
-Refs: [1](https://stackoverflow.com/questions/18968979/how-to-make-colorized-message-with-cmake)
 
 ---
 
